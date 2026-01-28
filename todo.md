@@ -79,3 +79,10 @@
 - [x] Mobile responsiveness
 - [x] Loading states and error handling
 - [x] Accessibility improvements
+
+## PWA Support
+- [x] Create web app manifest (manifest.json)
+- [x] Add PWA icons (192x192 and 512x512)
+- [x] Configure service worker for offline support
+- [x] Add meta tags for PWA in index.html
+- [x] Install and configure vite-plugin-pwa

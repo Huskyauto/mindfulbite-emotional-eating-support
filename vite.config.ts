@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
+import { VitePWA } from "vite-plugin-pwa";
 
 // =============================================================================
 // Manus Debug Collector - Vite Plugin
@@ -150,7 +151,67 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginManusRuntime(),
+  vitePluginManusDebugCollector(),
+  VitePWA({
+    registerType: "autoUpdate",
+    includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
+    manifest: {
+      name: "MindfulBite - Emotional Eating Support",
+      short_name: "MindfulBite",
+      description: "Break free from emotional eating with mindfulness, compassion, and evidence-based techniques",
+      theme_color: "#4a7c59",
+      background_color: "#f8faf8",
+      display: "standalone",
+      orientation: "portrait",
+      scope: "/",
+      start_url: "/",
+      categories: ["health", "lifestyle", "wellness"],
+      icons: [
+        {
+          src: "/pwa-192x192.png",
+          sizes: "192x192",
+          type: "image/png",
+        },
+        {
+          src: "/pwa-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+        },
+        {
+          src: "/pwa-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "any maskable",
+        },
+      ],
+    },
+    workbox: {
+      globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+      maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB limit
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/api\./i,
+          handler: "NetworkFirst",
+          options: {
+            cacheName: "api-cache",
+            expiration: {
+              maxEntries: 50,
+              maxAgeSeconds: 60 * 60 * 24, // 24 hours
+            },
+          },
+        },
+      ],
+    },
+    devOptions: {
+      enabled: false,
+    },
+  }),
+];
 
 export default defineConfig({
   plugins,
