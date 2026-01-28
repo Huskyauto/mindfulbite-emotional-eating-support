@@ -21,15 +21,23 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Heart, MessageCircle, Sparkles, BookOpen, Zap, TrendingUp, Target, Users, GraduationCap } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+  { icon: Heart, label: "Check-In", path: "/checkin" },
+  { icon: MessageCircle, label: "AI Coach", path: "/coach" },
+  { icon: Sparkles, label: "Meditations", path: "/meditations" },
+  { icon: BookOpen, label: "Journal", path: "/journal" },
+  { icon: Zap, label: "Emergency Toolkit", path: "/toolkit" },
+  { icon: TrendingUp, label: "Progress", path: "/progress" },
+  { icon: Target, label: "Habits", path: "/habits" },
+  { icon: Users, label: "Community", path: "/community" },
+  { icon: GraduationCap, label: "Learn", path: "/learn" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";

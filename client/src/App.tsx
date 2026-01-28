@@ -5,31 +5,41 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
+import CheckIn from "./pages/CheckIn";
+import Coach from "./pages/Coach";
+import Meditations from "./pages/Meditations";
+import Journal from "./pages/Journal";
+import Toolkit from "./pages/Toolkit";
+import Progress from "./pages/Progress";
+import Habits from "./pages/Habits";
+import Community from "./pages/Community";
+import Learn from "./pages/Learn";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+      <Route path="/" component={Home} />
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/checkin" component={CheckIn} />
+      <Route path="/coach" component={Coach} />
+      <Route path="/meditations" component={Meditations} />
+      <Route path="/journal" component={Journal} />
+      <Route path="/toolkit" component={Toolkit} />
+      <Route path="/progress" component={Progress} />
+      <Route path="/habits" component={Habits} />
+      <Route path="/community" component={Community} />
+      <Route path="/learn" component={Learn} />
+      <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
           <Router />
