@@ -209,3 +209,190 @@ export const toolkitUsage = mysqlTable("toolkit_usage", {
 
 export type ToolkitUsage = typeof toolkitUsage.$inferSelect;
 export type InsertToolkitUsage = typeof toolkitUsage.$inferInsert;
+
+
+// Exercise and workout tracking
+export const workouts = mysqlTable("workouts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  workoutType: mysqlEnum("workoutType", ["strength", "walking", "incline", "rucking", "nordic", "other"]).notNull(),
+  name: varchar("name", { length: 255 }),
+  durationMinutes: int("durationMinutes").notNull(),
+  // Walking specific
+  distanceMiles: decimal("distanceMiles", { precision: 4, scale: 2 }),
+  inclinePercent: int("inclinePercent"),
+  ruckWeightLbs: int("ruckWeightLbs"),
+  avgHeartRate: int("avgHeartRate"),
+  // Strength specific
+  exercises: json("exercises").$type<{name: string, sets: number, reps: number, weight: number}[]>(),
+  // General
+  caloriesBurned: int("caloriesBurned"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Workout = typeof workouts.$inferSelect;
+export type InsertWorkout = typeof workouts.$inferInsert;
+
+// Supplement tracking
+export const supplements = mysqlTable("supplements", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  dosage: varchar("dosage", { length: 100 }),
+  tier: mysqlEnum("tier", ["tier1", "tier2", "tier3"]).default("tier1"),
+  frequency: mysqlEnum("frequency", ["daily", "twice_daily", "weekly", "as_needed"]).default("daily"),
+  timeOfDay: mysqlEnum("timeOfDay", ["morning", "afternoon", "evening", "bedtime", "with_meals"]),
+  isActive: boolean("isActive").default(true).notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Supplement = typeof supplements.$inferSelect;
+export type InsertSupplement = typeof supplements.$inferInsert;
+
+// Daily supplement intake log
+export const supplementLogs = mysqlTable("supplement_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  supplementId: int("supplementId").notNull(),
+  userId: int("userId").notNull(),
+  taken: boolean("taken").default(true).notNull(),
+  takenAt: timestamp("takenAt").defaultNow().notNull(),
+});
+
+export type SupplementLog = typeof supplementLogs.$inferSelect;
+export type InsertSupplementLog = typeof supplementLogs.$inferInsert;
+
+// Sleep tracking
+export const sleepLogs = mysqlTable("sleep_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  bedTime: timestamp("bedTime").notNull(),
+  wakeTime: timestamp("wakeTime").notNull(),
+  totalHours: decimal("totalHours", { precision: 4, scale: 2 }).notNull(),
+  quality: mysqlEnum("quality", ["excellent", "good", "fair", "poor"]),
+  // Factors
+  caffeineLate: boolean("caffeineLate").default(false),
+  screensBefore: boolean("screensBefore").default(false),
+  roomTemp: int("roomTemp"), // Fahrenheit
+  magnesiumTaken: boolean("magnesiumTaken").default(false),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SleepLog = typeof sleepLogs.$inferSelect;
+export type InsertSleepLog = typeof sleepLogs.$inferInsert;
+
+// Biohacking activities
+export const biohackingLogs = mysqlTable("biohacking_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  activityType: mysqlEnum("activityType", ["morning_sunlight", "cold_exposure", "sauna", "red_light", "neat_steps", "grounding"]).notNull(),
+  durationMinutes: int("durationMinutes"),
+  // Cold exposure specific
+  coldTemp: int("coldTemp"),
+  // Sauna specific
+  saunaTemp: int("saunaTemp"),
+  // NEAT specific
+  stepCount: int("stepCount"),
+  standingMinutes: int("standingMinutes"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type BiohackingLog = typeof biohackingLogs.$inferSelect;
+export type InsertBiohackingLog = typeof biohackingLogs.$inferInsert;
+
+// Nutrition tracking (protein, carbs, electrolytes)
+export const nutritionLogs = mysqlTable("nutrition_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  date: timestamp("date").defaultNow().notNull(),
+  proteinGrams: int("proteinGrams"),
+  carbsGrams: int("carbsGrams"),
+  fatGrams: int("fatGrams"),
+  calories: int("calories"),
+  // Electrolytes
+  sodiumMg: int("sodiumMg"),
+  potassiumMg: int("potassiumMg"),
+  magnesiumMg: int("magnesiumMg"),
+  // Carb cycling
+  isRefeedDay: boolean("isRefeedDay").default(false),
+  waterOz: int("waterOz"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type NutritionLog = typeof nutritionLogs.$inferSelect;
+export type InsertNutritionLog = typeof nutritionLogs.$inferInsert;
+
+// Body composition and milestones
+export const bodyMetrics = mysqlTable("body_metrics", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  date: timestamp("date").defaultNow().notNull(),
+  weightLbs: decimal("weightLbs", { precision: 5, scale: 1 }),
+  bodyFatPercent: decimal("bodyFatPercent", { precision: 4, scale: 1 }),
+  leanMassLbs: decimal("leanMassLbs", { precision: 5, scale: 1 }),
+  visceralFat: int("visceralFat"),
+  // Measurements
+  waistInches: decimal("waistInches", { precision: 4, scale: 1 }),
+  hipsInches: decimal("hipsInches", { precision: 4, scale: 1 }),
+  chestInches: decimal("chestInches", { precision: 4, scale: 1 }),
+  // Source
+  measurementType: mysqlEnum("measurementType", ["scale", "dexa", "bodpod", "tape"]),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type BodyMetric = typeof bodyMetrics.$inferSelect;
+export type InsertBodyMetric = typeof bodyMetrics.$inferInsert;
+
+// Milestones and rewards
+export const milestones = mysqlTable("milestones", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  milestoneName: varchar("milestoneName", { length: 255 }).notNull(),
+  targetValue: decimal("targetValue", { precision: 5, scale: 1 }),
+  currentValue: decimal("currentValue", { precision: 5, scale: 1 }),
+  reward: text("reward"),
+  completed: boolean("completed").default(false).notNull(),
+  completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Milestone = typeof milestones.$inferSelect;
+export type InsertMilestone = typeof milestones.$inferInsert;
+
+// AI Research history (auto-saved)
+export const aiResearchHistory = mysqlTable("ai_research_history", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  query: text("query").notNull(),
+  response: text("response").notNull(),
+  category: varchar("category", { length: 100 }),
+  sources: json("sources").$type<string[]>(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AiResearchHistory = typeof aiResearchHistory.$inferSelect;
+export type InsertAiResearchHistory = typeof aiResearchHistory.$inferInsert;
+
+// Functional Imagery Training (FIT) sessions
+export const fitSessions = mysqlTable("fit_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  category: mysqlEnum("category", ["goal_weight", "energy", "confidence", "health", "lifestyle"]).notNull(),
+  goalDescription: text("goalDescription").notNull(),
+  visualSee: text("visualSee").notNull(),
+  visualHear: text("visualHear"),
+  visualFeel: text("visualFeel"),
+  visualSmellTaste: text("visualSmellTaste"),
+  emotions: text("emotions"),
+  vividness: int("vividness").notNull(), // 1-10
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type FitSession = typeof fitSessions.$inferSelect;
+export type InsertFitSession = typeof fitSessions.$inferInsert;

@@ -15,6 +15,14 @@ import Progress from "./pages/Progress";
 import Habits from "./pages/Habits";
 import Community from "./pages/Community";
 import Learn from "./pages/Learn";
+import Exercise from "./pages/Exercise";
+import Supplements from "./pages/Supplements";
+import Sleep from "./pages/Sleep";
+import Biohacking from "./pages/Biohacking";
+import Nutrition from "./pages/Nutrition";
+import BodyMetrics from "./pages/BodyMetrics";
+import AIResearch from "./pages/AIResearch";
+import FIT from "./pages/FIT";
 
 function Router() {
   return (
@@ -30,6 +38,14 @@ function Router() {
       <Route path="/habits" component={Habits} />
       <Route path="/community" component={Community} />
       <Route path="/learn" component={Learn} />
+      <Route path="/exercise" component={Exercise} />
+      <Route path="/supplements" component={Supplements} />
+      <Route path="/sleep" component={Sleep} />
+      <Route path="/biohacking" component={Biohacking} />
+      <Route path="/nutrition" component={Nutrition} />
+      <Route path="/body-metrics" component={BodyMetrics} />
+      <Route path="/ai-research" component={AIResearch} />
+      <Route path="/fit" component={FIT} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

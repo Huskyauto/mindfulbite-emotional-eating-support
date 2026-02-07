@@ -86,3 +86,49 @@
 - [x] Configure service worker for offline support
 - [x] Add meta tags for PWA in index.html
 - [x] Install and configure vite-plugin-pwa
+
+
+## Playbook Integration (291-to-220 Content)
+
+### Exercise & Strength Training
+- [x] Add exercise tracking page with strength training programs
+- [x] Create walking protocol tracker (Zone 2, incline, rucking, Nordic)
+- [x] Add progressive workout plans (Months 1-3, 4-8 programs)
+- [x] Track workout frequency and progressive overload
+
+### Supplement Guidance
+- [x] Create supplement tracker with Tier 1, 2, 3 recommendations
+- [x] Add supplement schedule and reminders
+- [x] Include warnings for supplements to avoid
+- [x] Track daily supplement intake
+
+### Sleep & Recovery
+- [x] Add sleep tracking with 7-9 hour targets
+- [x] Create sleep optimization tips and protocols
+- [x] Track sleep quality and duration
+- [x] Add bedtime routine guidance
+
+### Biohacking Strategies
+- [x] Add morning sunlight exposure tracking
+- [x] Create NEAT optimization tips (steps, standing)
+- [x] Add cold exposure protocol tracker
+- [x] Include sauna therapy logging
+- [x] Add red light therapy tracking
+
+### Nutrition Enhancements
+- [x] Add protein tracking (130-160g daily target)
+- [x] Create carb cycling guidance
+- [x] Add electrolyte tracking (sodium, potassium, magnesium)
+- [x] Include metabolic adaptation countermeasures
+
+### Psychology & Motivation
+- [x] Add Functional Imagery Training (FIT) exercises
+- [x] Create milestone tracking with rewards
+- [x] Add identity-based thinking prompts
+- [x] Include accountability partner features
+- [x] Add body composition tracking (DEXA results)
+
+### AI Research Integration
+- [x] Store AI research history in database automatically
+- [x] Add research tab with auto-refresh
+- [x] Include history of past 10 AI interactions

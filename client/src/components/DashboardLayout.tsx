@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Heart, MessageCircle, Sparkles, BookOpen, Zap, TrendingUp, Target, Users, GraduationCap } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Heart, MessageCircle, Sparkles, BookOpen, Zap, TrendingUp, Target, Users, GraduationCap, Dumbbell, Pill, Moon, Flame, Apple, Scale, Search, Eye } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -36,6 +36,14 @@ const menuItems = [
   { icon: Zap, label: "Emergency Toolkit", path: "/toolkit" },
   { icon: TrendingUp, label: "Progress", path: "/progress" },
   { icon: Target, label: "Habits", path: "/habits" },
+  { icon: Dumbbell, label: "Exercise", path: "/exercise" },
+  { icon: Apple, label: "Nutrition", path: "/nutrition" },
+  { icon: Pill, label: "Supplements", path: "/supplements" },
+  { icon: Moon, label: "Sleep", path: "/sleep" },
+  { icon: Flame, label: "Biohacking", path: "/biohacking" },
+  { icon: Scale, label: "Body Metrics", path: "/body-metrics" },
+  { icon: Eye, label: "FIT Visualization", path: "/fit" },
+  { icon: Search, label: "AI Research", path: "/ai-research" },
   { icon: Users, label: "Community", path: "/community" },
   { icon: GraduationCap, label: "Learn", path: "/learn" },
 ];

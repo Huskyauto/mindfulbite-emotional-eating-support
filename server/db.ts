@@ -457,3 +457,279 @@ export async function getToolkitUsageByUserId(userId: number, limit = 30): Promi
     .orderBy(desc(toolkitUsage.createdAt))
     .limit(limit);
 }
+
+
+// ============ WORKOUT FUNCTIONS ============
+import { 
+  workouts, InsertWorkout, Workout,
+  supplements, InsertSupplement, Supplement,
+  supplementLogs, InsertSupplementLog, SupplementLog,
+  sleepLogs, InsertSleepLog, SleepLog,
+  biohackingLogs, InsertBiohackingLog, BiohackingLog,
+  nutritionLogs, InsertNutritionLog, NutritionLog,
+  bodyMetrics, InsertBodyMetric, BodyMetric,
+  milestones, InsertMilestone, Milestone,
+  aiResearchHistory, InsertAiResearchHistory, AiResearchHistory,
+  fitSessions, InsertFitSession, FitSession
+} from "../drizzle/schema";
+
+export async function createWorkout(data: InsertWorkout): Promise<Workout | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.insert(workouts).values(data);
+  const insertId = result[0].insertId;
+  const created = await db.select().from(workouts).where(eq(workouts.id, insertId)).limit(1);
+  return created[0];
+}
+
+export async function getWorkoutsByUserId(userId: number, limit = 30): Promise<Workout[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(workouts)
+    .where(eq(workouts.userId, userId))
+    .orderBy(desc(workouts.createdAt))
+    .limit(limit);
+}
+
+export async function getWorkoutStats(userId: number) {
+  const db = await getDb();
+  if (!db) return { totalWorkouts: 0, totalMinutes: 0, strengthSessions: 0, walkingSessions: 0 };
+  const result = await db.select({
+    totalWorkouts: sql<number>`COUNT(*)`,
+    totalMinutes: sql<number>`COALESCE(SUM(${workouts.durationMinutes}), 0)`,
+    strengthSessions: sql<number>`SUM(CASE WHEN ${workouts.workoutType} = 'strength' THEN 1 ELSE 0 END)`,
+    walkingSessions: sql<number>`SUM(CASE WHEN ${workouts.workoutType} IN ('walking', 'incline', 'rucking', 'nordic') THEN 1 ELSE 0 END)`
+  }).from(workouts).where(eq(workouts.userId, userId));
+  return result[0] || { totalWorkouts: 0, totalMinutes: 0, strengthSessions: 0, walkingSessions: 0 };
+}
+
+export async function getWeeklyWorkoutCount(userId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const result = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(workouts)
+    .where(and(eq(workouts.userId, userId), gte(workouts.createdAt, weekAgo)));
+  return result[0]?.count || 0;
+}
+
+// ============ SUPPLEMENT FUNCTIONS ============
+export async function createSupplement(data: InsertSupplement): Promise<Supplement | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.insert(supplements).values(data);
+  const insertId = result[0].insertId;
+  const created = await db.select().from(supplements).where(eq(supplements.id, insertId)).limit(1);
+  return created[0];
+}
+
+export async function getSupplementsByUserId(userId: number): Promise<Supplement[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(supplements)
+    .where(and(eq(supplements.userId, userId), eq(supplements.isActive, true)))
+    .orderBy(supplements.tier, supplements.name);
+}
+
+export async function updateSupplement(id: number, data: Partial<InsertSupplement>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(supplements).set(data).where(eq(supplements.id, id));
+}
+
+export async function logSupplementIntake(data: InsertSupplementLog): Promise<SupplementLog | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.insert(supplementLogs).values(data);
+  const insertId = result[0].insertId;
+  const created = await db.select().from(supplementLogs).where(eq(supplementLogs.id, insertId)).limit(1);
+  return created[0];
+}
+
+export async function getTodaySupplementLogs(userId: number): Promise<SupplementLog[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return await db.select().from(supplementLogs)
+    .where(and(eq(supplementLogs.userId, userId), gte(supplementLogs.takenAt, today)));
+}
+
+// ============ SLEEP FUNCTIONS ============
+export async function createSleepLog(data: InsertSleepLog): Promise<SleepLog | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.insert(sleepLogs).values(data);
+  const insertId = result[0].insertId;
+  const created = await db.select().from(sleepLogs).where(eq(sleepLogs.id, insertId)).limit(1);
+  return created[0];
+}
+
+export async function getSleepLogsByUserId(userId: number, limit = 30): Promise<SleepLog[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(sleepLogs)
+    .where(eq(sleepLogs.userId, userId))
+    .orderBy(desc(sleepLogs.createdAt))
+    .limit(limit);
+}
+
+export async function getSleepStats(userId: number) {
+  const db = await getDb();
+  if (!db) return { avgHours: 0, avgQuality: 0, totalLogs: 0 };
+  const result = await db.select({
+    avgHours: sql<number>`COALESCE(AVG(${sleepLogs.totalHours}), 0)`,
+    totalLogs: sql<number>`COUNT(*)`
+  }).from(sleepLogs).where(eq(sleepLogs.userId, userId));
+  return result[0] || { avgHours: 0, totalLogs: 0 };
+}
+
+// ============ BIOHACKING FUNCTIONS ============
+export async function createBiohackingLog(data: InsertBiohackingLog): Promise<BiohackingLog | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.insert(biohackingLogs).values(data);
+  const insertId = result[0].insertId;
+  const created = await db.select().from(biohackingLogs).where(eq(biohackingLogs.id, insertId)).limit(1);
+  return created[0];
+}
+
+export async function getBiohackingLogsByUserId(userId: number, limit = 30): Promise<BiohackingLog[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(biohackingLogs)
+    .where(eq(biohackingLogs.userId, userId))
+    .orderBy(desc(biohackingLogs.createdAt))
+    .limit(limit);
+}
+
+export async function getTodayBiohackingLogs(userId: number): Promise<BiohackingLog[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return await db.select().from(biohackingLogs)
+    .where(and(eq(biohackingLogs.userId, userId), gte(biohackingLogs.createdAt, today)));
+}
+
+// ============ NUTRITION FUNCTIONS ============
+export async function createNutritionLog(data: InsertNutritionLog): Promise<NutritionLog | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.insert(nutritionLogs).values(data);
+  const insertId = result[0].insertId;
+  const created = await db.select().from(nutritionLogs).where(eq(nutritionLogs.id, insertId)).limit(1);
+  return created[0];
+}
+
+export async function getNutritionLogsByUserId(userId: number, limit = 30): Promise<NutritionLog[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(nutritionLogs)
+    .where(eq(nutritionLogs.userId, userId))
+    .orderBy(desc(nutritionLogs.date))
+    .limit(limit);
+}
+
+export async function getTodayNutritionLog(userId: number): Promise<NutritionLog | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const result = await db.select().from(nutritionLogs)
+    .where(and(eq(nutritionLogs.userId, userId), gte(nutritionLogs.date, today)))
+    .limit(1);
+  return result[0];
+}
+
+// ============ BODY METRICS FUNCTIONS ============
+export async function createBodyMetric(data: InsertBodyMetric): Promise<BodyMetric | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.insert(bodyMetrics).values(data);
+  const insertId = result[0].insertId;
+  const created = await db.select().from(bodyMetrics).where(eq(bodyMetrics.id, insertId)).limit(1);
+  return created[0];
+}
+
+export async function getBodyMetricsByUserId(userId: number, limit = 30): Promise<BodyMetric[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(bodyMetrics)
+    .where(eq(bodyMetrics.userId, userId))
+    .orderBy(desc(bodyMetrics.date))
+    .limit(limit);
+}
+
+export async function getLatestBodyMetric(userId: number): Promise<BodyMetric | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(bodyMetrics)
+    .where(eq(bodyMetrics.userId, userId))
+    .orderBy(desc(bodyMetrics.date))
+    .limit(1);
+  return result[0];
+}
+
+// ============ MILESTONE FUNCTIONS ============
+export async function createMilestone(data: InsertMilestone): Promise<Milestone | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.insert(milestones).values(data);
+  const insertId = result[0].insertId;
+  const created = await db.select().from(milestones).where(eq(milestones.id, insertId)).limit(1);
+  return created[0];
+}
+
+export async function getMilestonesByUserId(userId: number): Promise<Milestone[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(milestones)
+    .where(eq(milestones.userId, userId))
+    .orderBy(milestones.completed, desc(milestones.createdAt));
+}
+
+export async function updateMilestone(id: number, data: Partial<InsertMilestone>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(milestones).set(data).where(eq(milestones.id, id));
+}
+
+// ============ AI RESEARCH HISTORY FUNCTIONS ============
+export async function saveAiResearch(data: InsertAiResearchHistory): Promise<AiResearchHistory | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.insert(aiResearchHistory).values(data);
+  const insertId = result[0].insertId;
+  const created = await db.select().from(aiResearchHistory).where(eq(aiResearchHistory.id, insertId)).limit(1);
+  return created[0];
+}
+
+export async function getAiResearchHistory(userId: number, limit = 10): Promise<AiResearchHistory[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(aiResearchHistory)
+    .where(eq(aiResearchHistory.userId, userId))
+    .orderBy(desc(aiResearchHistory.createdAt))
+    .limit(limit);
+}
+
+// ============ FIT SESSION FUNCTIONS ============
+export async function createFitSession(data: InsertFitSession): Promise<FitSession | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.insert(fitSessions).values(data);
+  const insertId = result[0].insertId;
+  const created = await db.select().from(fitSessions).where(eq(fitSessions.id, insertId)).limit(1);
+  return created[0];
+}
+
+export async function getFitSessionsByUserId(userId: number, limit = 30): Promise<FitSession[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(fitSessions)
+    .where(eq(fitSessions.userId, userId))
+    .orderBy(desc(fitSessions.createdAt))
+    .limit(limit);
+}
