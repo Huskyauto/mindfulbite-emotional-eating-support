@@ -132,3 +132,9 @@
 - [x] Store AI research history in database automatically
 - [x] Add research tab with auto-refresh
 - [x] Include history of past 10 AI interactions
+
+
+## Bug Fixes
+- [x] Fix bodyMetrics.latest query returning undefined
+- [x] Fix checkIn.today query returning undefined
+- [x] Ensure all tRPC queries return null instead of undefined when no data exists

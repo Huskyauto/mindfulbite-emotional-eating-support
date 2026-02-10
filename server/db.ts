@@ -148,16 +148,16 @@ export async function getCheckInsByUserId(userId: number, limit = 30): Promise<C
     .limit(limit);
 }
 
-export async function getTodayCheckIn(userId: number): Promise<CheckIn | undefined> {
+export async function getTodayCheckIn(userId: number): Promise<CheckIn | null> {
   const db = await getDb();
-  if (!db) return undefined;
+  if (!db) return null;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const result = await db.select().from(checkIns)
     .where(and(eq(checkIns.userId, userId), gte(checkIns.createdAt, today)))
     .orderBy(desc(checkIns.createdAt))
     .limit(1);
-  return result[0];
+  return result[0] || null;
 }
 
 // ============ CHAT FUNCTIONS ============
@@ -632,15 +632,15 @@ export async function getNutritionLogsByUserId(userId: number, limit = 30): Prom
     .limit(limit);
 }
 
-export async function getTodayNutritionLog(userId: number): Promise<NutritionLog | undefined> {
+export async function getTodayNutritionLog(userId: number): Promise<NutritionLog | null> {
   const db = await getDb();
-  if (!db) return undefined;
+  if (!db) return null;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const result = await db.select().from(nutritionLogs)
     .where(and(eq(nutritionLogs.userId, userId), gte(nutritionLogs.date, today)))
     .limit(1);
-  return result[0];
+  return result[0] || null;
 }
 
 // ============ BODY METRICS FUNCTIONS ============
@@ -662,14 +662,14 @@ export async function getBodyMetricsByUserId(userId: number, limit = 30): Promis
     .limit(limit);
 }
 
-export async function getLatestBodyMetric(userId: number): Promise<BodyMetric | undefined> {
+export async function getLatestBodyMetric(userId: number): Promise<BodyMetric | null> {
   const db = await getDb();
-  if (!db) return undefined;
+  if (!db) return null;
   const result = await db.select().from(bodyMetrics)
     .where(eq(bodyMetrics.userId, userId))
     .orderBy(desc(bodyMetrics.date))
     .limit(1);
-  return result[0];
+  return result[0] || null;
 }
 
 // ============ MILESTONE FUNCTIONS ============
