@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Scale, Plus, TrendingDown, Activity, Ruler } from "lucide-react";
+import { Scale, Plus, TrendingDown, Activity, Ruler, LineChart as LineChartIcon } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 export default function BodyMetrics() {
   const { user } = useAuth();
@@ -307,6 +308,91 @@ export default function BodyMetrics() {
                   <p className={`text-2xl font-bold ${progress.bodyFatChange < 0 ? 'text-green-600' : 'text-orange-600'}`}>
                     {progress.bodyFatChange > 0 ? '+' : ''}{progress.bodyFatChange.toFixed(1)}%
                   </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Progress Charts */}
+      {metrics && metrics.length >= 2 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <LineChartIcon className="w-5 h-5 text-primary" />
+              Progress Trends
+            </CardTitle>
+            <CardDescription>Visual tracking of your body composition changes over time</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-8">
+              {/* Weight Trend Chart */}
+              {metrics.some(m => m.weightLbs) && (
+                <div>
+                  <h3 className="font-medium mb-4">Weight Trend (lbs)</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart data={[...metrics].reverse().map(m => ({
+                      date: new Date(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                      weight: m.weightLbs ? parseFloat(m.weightLbs) : null
+                    })).filter(d => d.weight !== null)}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="date" className="text-xs" />
+                      <YAxis className="text-xs" domain={['dataMin - 5', 'dataMax + 5']} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
+                        labelStyle={{ color: 'hsl(var(--foreground))' }}
+                      />
+                      <Legend />
+                      <Line type="monotone" dataKey="weight" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} name="Weight" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              {/* Body Fat Percentage Chart */}
+              {metrics.some(m => m.bodyFatPercent) && (
+                <div>
+                  <h3 className="font-medium mb-4">Body Fat Percentage (%)</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart data={[...metrics].reverse().map(m => ({
+                      date: new Date(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                      bodyFat: m.bodyFatPercent ? parseFloat(m.bodyFatPercent) : null
+                    })).filter(d => d.bodyFat !== null)}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="date" className="text-xs" />
+                      <YAxis className="text-xs" domain={['dataMin - 2', 'dataMax + 2']} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
+                        labelStyle={{ color: 'hsl(var(--foreground))' }}
+                      />
+                      <Legend />
+                      <Line type="monotone" dataKey="bodyFat" stroke="#f97316" strokeWidth={2} dot={{ r: 4 }} name="Body Fat %" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              {/* Waist Measurement Chart */}
+              {metrics.some(m => m.waistInches) && (
+                <div>
+                  <h3 className="font-medium mb-4">Waist Measurement (inches)</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart data={[...metrics].reverse().map(m => ({
+                      date: new Date(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                      waist: m.waistInches ? parseFloat(m.waistInches) : null
+                    })).filter(d => d.waist !== null)}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="date" className="text-xs" />
+                      <YAxis className="text-xs" domain={['dataMin - 2', 'dataMax + 2']} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
+                        labelStyle={{ color: 'hsl(var(--foreground))' }}
+                      />
+                      <Legend />
+                      <Line type="monotone" dataKey="waist" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} name="Waist" />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
               )}
             </div>

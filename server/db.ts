@@ -14,7 +14,11 @@ import {
   postLikes, InsertPostLike, PostLike,
   challenges, InsertChallenge, Challenge,
   userChallenges, InsertUserChallenge, UserChallenge,
-  toolkitUsage, InsertToolkitUsage, ToolkitUsage
+  toolkitUsage, InsertToolkitUsage, ToolkitUsage,
+  recipes, InsertRecipe, Recipe,
+  mealPlans, InsertMealPlan, MealPlan,
+  plannedMeals, InsertPlannedMeal, PlannedMeal,
+  groceryLists, InsertGroceryList, GroceryList
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -732,4 +736,162 @@ export async function getFitSessionsByUserId(userId: number, limit = 30): Promis
     .where(eq(fitSessions.userId, userId))
     .orderBy(desc(fitSessions.createdAt))
     .limit(limit);
+}
+
+
+// ============ MEAL PLANNING FUNCTIONS ============
+
+// Get all public recipes
+export async function getPublicRecipes() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(recipes).where(eq(recipes.isPublic, true)).orderBy(desc(recipes.createdAt));
+  return result;
+}
+
+// Get user's custom recipes
+export async function getUserRecipes(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(recipes).where(eq(recipes.createdBy, userId)).orderBy(desc(recipes.createdAt));
+  return result;
+}
+
+// Create a new recipe
+export async function createRecipe(recipe: InsertRecipe) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(recipes).values(recipe);
+  return result;
+}
+
+// Get user's meal plans
+export async function getUserMealPlans(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(mealPlans).where(eq(mealPlans.userId, userId)).orderBy(desc(mealPlans.weekStartDate));
+  return result;
+}
+
+// Get current week's meal plan
+export async function getCurrentMealPlan(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+  startOfWeek.setHours(0, 0, 0, 0);
+  
+  const result = await db.select().from(mealPlans)
+    .where(and(
+      eq(mealPlans.userId, userId),
+      gte(mealPlans.weekStartDate, startOfWeek)
+    ))
+    .limit(1);
+  
+  return result.length > 0 ? result[0] : null;
+}
+
+// Create meal plan
+export async function createMealPlan(plan: InsertMealPlan) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(mealPlans).values(plan);
+  return result;
+}
+
+// Get planned meals for a meal plan
+export async function getPlannedMeals(mealPlanId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(plannedMeals)
+    .where(eq(plannedMeals.mealPlanId, mealPlanId))
+    .orderBy(plannedMeals.dayOfWeek, plannedMeals.mealType);
+  return result;
+}
+
+// Add planned meal
+export async function addPlannedMeal(meal: InsertPlannedMeal) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(plannedMeals).values(meal);
+  return result;
+}
+
+// Update planned meal completion status
+export async function updatePlannedMealCompletion(mealId: number, completed: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.update(plannedMeals)
+    .set({ completed })
+    .where(eq(plannedMeals.id, mealId));
+  return result;
+}
+
+// Get user's grocery lists
+export async function getUserGroceryLists(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(groceryLists)
+    .where(eq(groceryLists.userId, userId))
+    .orderBy(desc(groceryLists.createdAt));
+  return result;
+}
+
+// Create grocery list
+export async function createGroceryList(list: InsertGroceryList) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(groceryLists).values(list);
+  return result;
+}
+
+// Update grocery list
+export async function updateGroceryList(listId: number, items: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.update(groceryLists)
+    .set({ items, updatedAt: new Date() })
+    .where(eq(groceryLists.id, listId));
+  return result;
+}
+
+// Generate grocery list from meal plan
+export async function generateGroceryListFromMealPlan(mealPlanId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const meals = await getPlannedMeals(mealPlanId);
+  const ingredients: Array<{ name: string; quantity: string; category: string; checked: boolean }> = [];
+  
+  for (const meal of meals) {
+    if (meal.recipeId) {
+      const recipe = await db.select().from(recipes).where(eq(recipes.id, meal.recipeId)).limit(1);
+      if (recipe.length > 0 && recipe[0].ingredients) {
+        const recipeIngredients = recipe[0].ingredients as string[];
+        recipeIngredients.forEach(ing => {
+          ingredients.push({
+            name: ing,
+            quantity: `${meal.servings || 1} serving(s)`,
+            category: "Uncategorized",
+            checked: false
+          });
+        });
+      }
+    }
+  }
+  
+  return ingredients;
 }

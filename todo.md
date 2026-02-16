@@ -142,3 +142,29 @@
 
 ## AI Model Update
 - [x] Switch AI model from gemini-2.5-flash to gpt-4.1-nano
+
+
+## New Features - Enhancement Phase
+### Progress Visualization Charts
+- [x] Add Recharts library dependency
+- [x] Create weight trend line chart for Body Metrics page
+- [x] Create body fat percentage chart
+- [x] Add workout progress chart to Progress page
+- [x] Add nutrition tracking charts
+- [x] Implement interactive tooltips for all charts
+
+### Meal Planning Feature
+- [ ] Create meal planning database schema
+- [ ] Add meal planner page with weekly calendar view
+- [ ] Build recipe database with macro-friendly recipes
+- [ ] Implement automatic grocery list generation
+- [ ] Add meal prep schedule functionality
+- [ ] Create recipe search and filtering
+
+### Browser Push Notifications
+- [ ] Implement service worker notification API
+- [ ] Create notification preferences page
+- [ ] Add daily check-in reminders (customizable time)
+- [ ] Add supplement schedule notifications
+- [ ] Add workout time reminders
+- [ ] Implement notification permission request flow

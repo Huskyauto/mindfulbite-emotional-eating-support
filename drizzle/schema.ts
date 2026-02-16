@@ -396,3 +396,82 @@ export const fitSessions = mysqlTable("fit_sessions", {
 
 export type FitSession = typeof fitSessions.$inferSelect;
 export type InsertFitSession = typeof fitSessions.$inferInsert;
+
+
+// Meal Planning - Recipes
+export const recipes = mysqlTable("recipes", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  category: mysqlEnum("category", ["breakfast", "lunch", "dinner", "snack", "dessert"]).notNull(),
+  prepTimeMinutes: int("prepTimeMinutes"),
+  cookTimeMinutes: int("cookTimeMinutes"),
+  servings: int("servings").default(1),
+  // Macros per serving
+  caloriesPerServing: int("caloriesPerServing"),
+  proteinGrams: varchar("proteinGrams", { length: 10 }),
+  carbsGrams: varchar("carbsGrams", { length: 10 }),
+  fatGrams: varchar("fatGrams", { length: 10 }),
+  fiberGrams: varchar("fiberGrams", { length: 10 }),
+  // Recipe details
+  ingredients: json("ingredients").$type<string[]>(),
+  instructions: json("instructions").$type<string[]>(),
+  tags: json("tags").$type<string[]>(), // e.g., ["high-protein", "low-carb", "quick"]
+  imageUrl: text("imageUrl"),
+  isPublic: boolean("isPublic").default(true),
+  createdBy: int("createdBy"), // userId if user-created
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Recipe = typeof recipes.$inferSelect;
+export type InsertRecipe = typeof recipes.$inferInsert;
+
+// Meal Planning - Weekly Plans
+export const mealPlans = mysqlTable("meal_plans", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  weekStartDate: timestamp("weekStartDate").notNull(),
+  name: varchar("name", { length: 255 }),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MealPlan = typeof mealPlans.$inferSelect;
+export type InsertMealPlan = typeof mealPlans.$inferInsert;
+
+// Meal Planning - Planned Meals
+export const plannedMeals = mysqlTable("planned_meals", {
+  id: int("id").autoincrement().primaryKey(),
+  mealPlanId: int("mealPlanId").notNull(),
+  recipeId: int("recipeId"),
+  dayOfWeek: int("dayOfWeek").notNull(), // 0-6 (Sunday-Saturday)
+  mealType: mysqlEnum("mealType", ["breakfast", "lunch", "dinner", "snack"]).notNull(),
+  customName: varchar("customName", { length: 255 }), // For meals without recipes
+  customNotes: text("customNotes"),
+  servings: int("servings").default(1),
+  completed: boolean("completed").default(false),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PlannedMeal = typeof plannedMeals.$inferSelect;
+export type InsertPlannedMeal = typeof plannedMeals.$inferInsert;
+
+// Meal Planning - Grocery Lists
+export const groceryLists = mysqlTable("grocery_lists", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  mealPlanId: int("mealPlanId"), // Optional link to meal plan
+  name: varchar("name", { length: 255 }).notNull(),
+  items: json("items").$type<Array<{
+    name: string;
+    quantity: string;
+    category: string;
+    checked: boolean;
+  }>>(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type GroceryList = typeof groceryLists.$inferSelect;
+export type InsertGroceryList = typeof groceryLists.$inferInsert;
