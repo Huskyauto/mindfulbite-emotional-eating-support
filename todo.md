@@ -138,3 +138,7 @@
 - [x] Fix bodyMetrics.latest query returning undefined
 - [x] Fix checkIn.today query returning undefined
 - [x] Ensure all tRPC queries return null instead of undefined when no data exists
+
+
+## AI Model Update
+- [x] Switch AI model from gemini-2.5-flash to gpt-4.1-nano
